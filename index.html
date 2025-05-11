@@ -2,15 +2,14 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Roulette</title>
+  <title>룰렛</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <style>
+  <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; background: #f5f5f5; }
     #controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; }
     #menu_input { flex: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
     #add_button { padding: 10px 20px; font-size: 16px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-    #roulette_container {
-      margin-top: 40px; position: relative; display: inline-block; }
+    #roulette_container { margin-top: 40px; position: relative; display: inline-block; }
     #pointer {
       position: absolute;
       top: -30px;
@@ -48,9 +47,17 @@
     <div id="pointer"></div>
     <canvas id="roulette_canvas" width="400" height="400"></canvas>
   </div>
-  <button id="spin_button">Turn</button>
+  <button id="spin_button">돌리기</button>
 
+  <!-- 결과 모달 -->
+  <div id="result_modal">
+    <div class="modal-content">
+      <p>당첨 항목:</p>
+      <strong id="result_text">항목</strong>
+      <br><br>
+      <button id="confirm_button">확인</button>
     </div>
+  </div>
 
   <script>
     const canvas = document.getElementById('roulette_canvas');
@@ -95,8 +102,7 @@
       if (is_spinning || !menu_items.length) return;
       is_spinning = true;
       fixed_items = [...menu_items];
-      const fixed_total = fixed_items.length;
-      const angle_per = (2 * Math.PI) / fixed_total;
+      const angle_per = (2 * Math.PI) / fixed_items.length;
       const spin_times = Math.floor(Math.random() * 6) + 5;
       const random_offset = Math.random() * angle_per;
       const final_angle = start_angle + spin_times * 2 * Math.PI + random_offset;
@@ -119,6 +125,12 @@
 
     function show_result() {
       is_spinning = false;
+      const angle_per = (2 * Math.PI) / fixed_items.length;
+      const pointer_angle = (3 * Math.PI / 2 - start_angle + 2 * Math.PI) % (2 * Math.PI);
+      const idx = Math.floor(pointer_angle / angle_per) % fixed_items.length;
+      const selected = fixed_items[idx];
+      document.getElementById('result_text').innerText = selected;
+      document.getElementById('result_modal').classList.add('show');
     }
 
     document.getElementById('add_button').addEventListener('click', sub_add_menu);
@@ -126,12 +138,17 @@
       if (e.key === 'Enter') sub_add_menu();
     });
     document.getElementById('spin_button').addEventListener('click', sub_spin_roulette);
-    document.getElementById('confirm_button').addEventListener('click', () => {
-      document.getElementById('result_modal').classList.remove('show');
-      document.getElementById('controls').style.display = 'flex';
-      document.getElementById('roulette_container').style.display = 'inline-block';
-      document.getElementById('spin_button').style.display = 'inline-block';
-    });
+
+    const confirmButton = document.getElementById('confirm_button');
+    if (confirmButton) {
+      confirmButton.addEventListener('click', () => {
+        document.getElementById('result_modal').classList.remove('show');
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('roulette_container').style.display = 'inline-block';
+        document.getElementById('spin_button').style.display = 'inline-block';
+      });
+    }
+
     canvas.addEventListener('click', e => {
       if (is_spinning || !menu_items.length) return;
       const rect = canvas.getBoundingClientRect();
