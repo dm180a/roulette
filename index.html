@@ -93,14 +93,20 @@
     }
 
     function sub_add_menu() {
+      if (is_spinning) return;
       const input = document.getElementById('menu_input');
-      const value = input.value.trim(); if (!value) return;
-      menu_items.push(value); input.value = ''; sub_draw_roulette();
+      const value = input.value.trim();
+      if (!value) return;
+      menu_items.push(value);
+      input.value = '';
+      sub_draw_roulette();
     }
 
     function sub_spin_roulette() {
       if (is_spinning || !menu_items.length) return;
       is_spinning = true;
+      document.getElementById('add_button').disabled = true;
+      document.getElementById('menu_input').disabled = true;
       fixed_items = [...menu_items];
       const angle_per = (2 * Math.PI) / fixed_items.length;
       const spin_times = Math.floor(Math.random() * 6) + 5;
@@ -125,6 +131,8 @@
 
     function show_result() {
       is_spinning = false;
+      document.getElementById('add_button').disabled = false;
+      document.getElementById('menu_input').disabled = false;
       const angle_per = (2 * Math.PI) / fixed_items.length;
       const pointer_angle = (3 * Math.PI / 2 - start_angle + 2 * Math.PI) % (2 * Math.PI);
       const idx = Math.floor(pointer_angle / angle_per) % fixed_items.length;
